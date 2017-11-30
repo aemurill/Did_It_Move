@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Did It Move</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="my_service_started">The random service has started.</string>
+    <string name="notification_title">Random service</string>
+    <string name="my_service_running">The random service is running.</string>
+    <string name="exit">Exit</string>
+    <string name="clear">Clear</string>
+    <string name="Untouched">Everything was quiet.\nNo one\'s touched anything.</string>
+    <string name="Touched">The phone moved!\nSomeone\'s touched it!</string>
+
+</resources>
