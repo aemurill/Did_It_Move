@@ -14,15 +14,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class MyServiceTask implements Runnable, SensorEventListener {
+public class MyServiceTask implements SensorEventListener, Runnable {
     //GENERAL VARS
     private static final String LOG_TAG = "MyServiceTask";
-    private Context context;
     private boolean running = true;
-    private boolean state;
-
-    //MOVEMENT VARS
-    private Date timer_start = new Date();
 
     //SENSOR VARS
     private long lastUpdate = 0;
@@ -30,6 +25,11 @@ public class MyServiceTask implements Runnable, SensorEventListener {
     private static final int SHAKE_THRESHOLD = 100;
     private SensorManager mSensorManager;
     private Sensor mSensor;
+
+    //DATE VARS
+    private Date first_accel_time = null;
+    private boolean state = false;
+    private Date timer_start = new Date();
 
     //CALLBACK VARS
     private Set<ResultCallback> resultCallbacks = Collections.synchronizedSet(
@@ -39,16 +39,15 @@ public class MyServiceTask implements Runnable, SensorEventListener {
 
 
     public MyServiceTask(Context context) {
-        this.context = context;
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
+        if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             Log.i(LOG_TAG, "ACCELEROMETER DETECTED");
             mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            mSensorManager.registerListener(this, mSensor,
-                    SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
         else{
-            Toast.makeText(context, "No Accelerometer\nApp won't work on your device!\nSorry!",
+            Toast.makeText(context,
+                    "No Accelerometer\nApp won't work on your device!\nSorry!",
                     Toast.LENGTH_LONG).show();
             Log.e(LOG_TAG, "No Accelerometer.");
         }
@@ -57,8 +56,11 @@ public class MyServiceTask implements Runnable, SensorEventListener {
     public boolean didItMove(){
         Date d = new Date();
         boolean moved = false;
-        if (d.getTime() - timer_start.getTime() > 30000){
+        Log.i(LOG_TAG, "Did It Move?  ");
+        Log.i(LOG_TAG, "TIME STATUS:  " + first_accel_time);
+        if (first_accel_time != null && d.getTime() - first_accel_time.getTime() > 30000){
             moved = true;
+            Log.i(LOG_TAG, "MOVED");
         }
         return moved;
 
@@ -79,11 +81,15 @@ public class MyServiceTask implements Runnable, SensorEventListener {
                 lastUpdate = curTime;
 
                 float speed = Math.abs(x + y + z - last_x - last_y - last_z) / diffTime * 10000;
-                Log.i(LOG_TAG, "Speed :  " + speed);
-                if(speed > SHAKE_THRESHOLD){
-                    Log.i(LOG_TAG, "ACCELERATION CHANGE");
+                Date timer_now = new Date();
+                if(speed > SHAKE_THRESHOLD && (timer_now.getTime() - timer_start.getTime() > 30000)){
+                    Log.i(LOG_TAG, "ACCELERATION CHANGED AFTER 30S");
                     //DO SOMETHING
-                    state = didItMove();
+                    if(!state){
+                        first_accel_time = new Date();
+                        Log.i(LOG_TAG, "TIME :  " + first_accel_time);
+                        state = true;
+                    }
                 }
                 last_x = x;
                 last_y = y;
@@ -99,21 +105,15 @@ public class MyServiceTask implements Runnable, SensorEventListener {
 
     @Override
     public void run() {
-        while (running) {
-            if(running) {
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    e.getLocalizedMessage();
-                }
-                // Sends it to the UI thread in MainActivity
-                // (if MainActivity is running).
-                Log.i(LOG_TAG, "Sending random number: " + state);
-                notifyResultCallback(state);
-            }else{
-                Log.i(LOG_TAG, "Shutting down service");
+        while(running) {
+            try{
+                Thread.sleep(100);
+            }catch(Exception e){
+                e.getLocalizedMessage();
             }
+            if(state) notifyResultCallback(didItMove());
         }
+        Log.i(LOG_TAG, "Shutting down service");
     }
 
     public void addResultCallback(ResultCallback resultCallback) {
@@ -176,6 +176,7 @@ public class MyServiceTask implements Runnable, SensorEventListener {
             if (result != null) {
                 result.status = b;
                 for (ResultCallback resultCallback : resultCallbacks) {
+                    Log.i(LOG_TAG, "as per https://piazza.com/class/j7zn8zecw893w1?cid=178");
                     Log.i(LOG_TAG, "calling resultCallback for " + result.status);
                     resultCallback.onResultReady(result);
                 }
@@ -189,6 +190,6 @@ public class MyServiceTask implements Runnable, SensorEventListener {
 
     public void clearStatus(){
         state = false;
-        timer_start = new Date();
+        first_accel_time = null;
     }
 }

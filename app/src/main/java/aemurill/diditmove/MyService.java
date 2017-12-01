@@ -8,6 +8,8 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
+import java.util.Date;
+
 import aemurill.diditmove.MyServiceTask.ResultCallback;
 
 public class MyService extends Service{
@@ -34,6 +36,10 @@ public class MyService extends Service{
     }
 
     public MyService() {
+    }
+
+    public boolean didItMove(){
+        return myTask.didItMove();
     }
 
     @Override

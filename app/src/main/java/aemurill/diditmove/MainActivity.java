@@ -4,6 +4,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -14,11 +18,14 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Date;
 
 import aemurill.diditmove.MyService.MyBinder;
 
-public class MainActivity extends AppCompatActivity
-        implements aemurill.diditmove.MyServiceTask.ResultCallback {
+public class MainActivity extends AppCompatActivity implements
+        aemurill.diditmove.MyServiceTask.ResultCallback {
 
     public static final int DISPLAY_NUMBER = 10;
     private Handler mUiHandler;
@@ -28,6 +35,12 @@ public class MainActivity extends AppCompatActivity
     // Service connection variables.
     private boolean serviceBound;
     private MyService myService;
+
+    public boolean didItMove(){
+        return myService.didItMove();
+    }
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,6 +58,8 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button
                 myService.clearStatus();
+                TextView tv = (TextView) findViewById(R.id.number_view);
+                tv.setText(R.string.Untouched);
             }
         });
 
@@ -64,7 +79,16 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, MyService.class);
         startService(intent);
         bindMyService();
-
+        if(myService != null) {
+            boolean result = didItMove();
+            Log.i(LOG_TAG, "Displaying: " + result);
+            TextView tv = (TextView) findViewById(R.id.number_view);
+            if (result) {
+                tv.setText(R.string.Touched);
+            } else {
+                tv.setText(R.string.Untouched);
+            }
+        }
     }
 
     private void bindMyService() {
