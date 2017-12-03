@@ -191,5 +191,6 @@ public class MyServiceTask implements SensorEventListener, Runnable {
     public void clearStatus(){
         state = false;
         first_accel_time = null;
+        timer_start = new Date();
     }
 }

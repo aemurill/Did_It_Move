@@ -11,5 +11,6 @@
     <string name="clear">Clear</string>
     <string name="Untouched">Everything was quiet.\nNo one\'s touched anything.</string>
     <string name="Touched">The phone moved!\nSomeone\'s touched it!</string>
+    <string name="starting_text">Put me down to start monitoring!\nMinimizing this is recommended</string>
 
 </resources>

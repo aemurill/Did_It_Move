@@ -4,10 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -18,9 +14,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.Date;
 
 import aemurill.diditmove.MyService.MyBinder;
 
@@ -59,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements
                 // Code here executes on main thread after user presses button
                 myService.clearStatus();
                 TextView tv = (TextView) findViewById(R.id.number_view);
-                tv.setText(R.string.Untouched);
+                tv.setText(R.string.starting_text);
             }
         });
 
